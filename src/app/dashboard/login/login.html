@@ -24,13 +24,13 @@
                 <form class="auth-form" id="loginForm">
                     <div class="input-group">
                         <label for="loginEmail">Email Address</label>
-                        <input type="email" id="loginEmail" name="email" required>
+                        <input type="email" id="loginEmail" name="email" [(ngModel)]="loginData.email" required>
                         <span class="input-line"></span>
                     </div>
                     
                     <div class="input-group">
                         <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" name="password" required>
+                        <input type="password" id="loginPassword" name="password" [(ngModel)]="loginData.password" required>
                         <span class="input-line"></span>
                     </div>
                     
@@ -43,8 +43,12 @@
                         <a href="#" class="forgot-link">Forgot Password?</a>
                     </div>
                     
-                    <button type="submit" class="primary-btn" routerLink="/dashboard/home">
-                        <span>Log In</span>
+                    <div *ngIf="errorMessage" class="error-message" style="color: #ef4444; text-align: center; margin-bottom: 1rem;">
+                        {{ errorMessage }}
+                    </div>
+                    
+                    <button type="submit" class="primary-btn" (click)="onLogin()" [disabled]="isLoading">
+                        <span>{{ isLoading ? 'Logging in...' : 'Log In' }}</span>
                         <div class="btn-gradient"></div>
                     </button>
                 </form>

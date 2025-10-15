@@ -9,6 +9,8 @@ import { Message } from './dashboard/message/message';
 import { Profile } from './dashboard/profile/profile';
 import { Signup } from './dashboard/signup/signup';
 import { Login } from './dashboard/login/login';
+import { AuthGuard } from './guards/auth.guard';
+import { ClientDashboardComponent } from './client/dashboard/dashboard.component';
 
 export const routes: Routes = [
     { path: '', component: Landing },
@@ -17,6 +19,8 @@ export const routes: Routes = [
     {
         path: 'dashboard',
         component: DashboardComponent,
+        canActivate: [AuthGuard],
+        data: { role: 'freelancer' },
         children: [
             { path: 'home', component: Home },
             { path: 'about', component: AboutUsComponent },
@@ -27,4 +31,13 @@ export const routes: Routes = [
             { path: '', redirectTo: 'home', pathMatch: 'full' } // Default child route
         ]
     },
+    {
+        path: 'client',
+        canActivate: [AuthGuard],
+        data: { role: 'client' },
+        children: [
+            { path: 'dashboard', component: ClientDashboardComponent },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+        ]
+    }
 ];
