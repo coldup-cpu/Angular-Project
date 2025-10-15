@@ -10,6 +10,12 @@ import { Profile } from './dashboard/profile/profile';
 import { Signup } from './dashboard/signup/signup';
 import { Login } from './dashboard/login/login';
 
+import { ClientHomeComponent } from './client/home/client-home.component';
+import { ClientOrdersComponent } from './client/orders/client-orders.component';
+import { ClientProfileComponent } from './client/profile/client-profile.component';
+
+import { authGuard, freelancerGuard, clientGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
     { path: '', component: Landing },
     { path: 'signup', component: Signup },
@@ -17,6 +23,7 @@ export const routes: Routes = [
     {
         path: 'dashboard',
         component: DashboardComponent,
+        canActivate: [freelancerGuard],
         children: [
             { path: 'home', component: Home },
             { path: 'about', component: AboutUsComponent },
@@ -24,7 +31,17 @@ export const routes: Routes = [
             { path: 'orders', component: Orders },
             { path: 'message', component: Message },
             { path: 'profile', component: Profile},
-            { path: '', redirectTo: 'home', pathMatch: 'full' } // Default child route
+            { path: '', redirectTo: 'home', pathMatch: 'full' }
         ]
     },
+    {
+        path: 'client',
+        canActivate: [clientGuard],
+        children: [
+            { path: 'home', component: ClientHomeComponent },
+            { path: 'orders', component: ClientOrdersComponent },
+            { path: 'profile', component: ClientProfileComponent },
+            { path: '', redirectTo: 'home', pathMatch: 'full' }
+        ]
+    }
 ];

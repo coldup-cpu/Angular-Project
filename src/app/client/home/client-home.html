@@ -23,19 +23,18 @@
         <section class="welcome-section">
             <div class="welcome-content">
                 <h1>Good morning, {{ userName() }}! 👋</h1>
-                <p>Ready to tackle your freelance projects today?</p>
+                <p>Manage your gigs and find talented freelancers</p>
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon active-projects">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 12l2 2 4-4"/>
-                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         </svg>
                     </div>
                     <div class="stat-info">
-                        <h3>{{ dashboardData()?.activeProjectsCount || 0 }}</h3>
-                        <p>Active Projects</p>
+                        <h3>{{ dashboardData()?.totalGigsPosted || 0 }}</h3>
+                        <p>Total Gigs</p>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -46,8 +45,8 @@
                         </svg>
                     </div>
                     <div class="stat-info">
-                        <h3>{{ dashboardData()?.pendingRequestsCount || 0 }}</h3>
-                        <p>Pending Requests</p>
+                        <h3>{{ dashboardData()?.activeProjectsCount || 0 }}</h3>
+                        <p>Active Projects</p>
                     </div>
                 </div>
             </div>
@@ -55,8 +54,49 @@
 
         <section class="projects-section">
             <div class="section-header">
-                <h2>Recent Gigs</h2>
+                <h2>My Gigs</h2>
+                <button class="create-btn" (click)="showCreateGig.set(true)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Create Gig
+                </button>
             </div>
+
+            @if (showCreateGig()) {
+                <div class="create-gig-form">
+                    <h3>Create New Gig</h3>
+                    <form (submit)="createGig(); $event.preventDefault()">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" [(ngModel)]="gigForm.title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea [(ngModel)]="gigForm.description" name="description" rows="4" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" [(ngModel)]="gigForm.category" name="category" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Budget ($)</label>
+                                <input type="number" [(ngModel)]="gigForm.budget" name="budget" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Deadline</label>
+                            <input type="date" [(ngModel)]="gigForm.deadline" name="deadline" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="cancel-btn" (click)="showCreateGig.set(false); resetForm()">Cancel</button>
+                            <button type="submit" class="submit-btn">Create Gig</button>
+                        </div>
+                    </form>
+                </div>
+            }
 
             @if (loading()) {
                 <div style="text-align: center; padding: 40px; color: #64748b;">
@@ -66,7 +106,7 @@
 
             @if (!loading() && gigs().length === 0) {
                 <div style="text-align: center; padding: 40px; color: #64748b;">
-                    <p>No gigs available at the moment</p>
+                    <p>No gigs created yet. Create your first gig!</p>
                 </div>
             }
 
@@ -74,27 +114,17 @@
                 @for (gig of gigs(); track gig._id) {
                     <div class="project-card">
                         <div class="project-header">
-                            <div class="project-client">
-                                <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100" alt="Client">
-                                <div class="client-info">
-                                    <h4>{{ gig.clientId?.firstName }} {{ gig.clientId?.lastName }}</h4>
-                                    <span class="project-type">{{ gig.category }}</span>
-                                </div>
+                            <h3 class="project-title">{{ gig.title }}</h3>
+                            <div class="priority-badge" [class.normal]="gig.status === 'open'" [class.urgent]="gig.status === 'closed'">
+                                {{ gig.status }}
                             </div>
-                            <div class="priority-badge normal">{{ gig.status }}</div>
                         </div>
-                        <h3 class="project-title">{{ gig.title }}</h3>
                         <p class="project-desc">{{ gig.description }}</p>
-                        <div class="project-footer">
-                            <span class="project-price">{{ formatBudget(gig.budget) }}</span>
-                            <span class="project-deadline">Due in {{ formatDate(gig.deadline) }}</span>
+                        <div class="project-meta">
+                            <span class="meta-item">{{ gig.category }}</span>
+                            <span class="meta-item">{{ formatBudget(gig.budget) }}</span>
+                            <span class="meta-item">Due: {{ formatDate(gig.deadline) }}</span>
                         </div>
-                        <button
-                            class="action-btn"
-                            (click)="sendRequest(gig._id)"
-                            style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;">
-                            Send Request
-                        </button>
                     </div>
                 }
             </div>
@@ -103,16 +133,15 @@
         <section class="quick-actions">
             <h2>Quick Actions</h2>
             <div class="actions-grid">
-                <button class="action-btn" routerLink="/dashboard/orders">
+                <button class="action-btn" routerLink="/client/orders">
                     <div class="action-icon proposals">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
                         </svg>
                     </div>
-                    <span>View Orders</span>
+                    <span>View Requests</span>
                 </button>
-                <button class="action-btn" routerLink="/dashboard/profile">
+                <button class="action-btn" routerLink="/client/profile">
                     <div class="action-icon portfolio">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 6L9 17l-5-5"/>
@@ -125,28 +154,20 @@
     </main>
 
     <nav class="bottom-nav">
-        <a routerLink="/dashboard/home" class="nav-item active">
+        <a routerLink="/client/home" class="nav-item active">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9,22 9,12 15,12 15,22"/>
             </svg>
             <span>Home</span>
         </a>
-        <a routerLink="/dashboard/orders" class="nav-item">
+        <a routerLink="/client/orders" class="nav-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 12l2 2 4-4"/>
                 <circle cx="12" cy="12" r="9"/>
             </svg>
             <span>Orders</span>
         </a>
-        <a routerLink="/dashboard/message" class="nav-item">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-            </svg>
-            <span>Messages</span>
-        </a>
-        <a routerLink="/dashboard/profile" class="nav-item">
+        <a routerLink="/client/profile" class="nav-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>

@@ -1,0 +1,141 @@
+<div class="mymain">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">FreelanceHub</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="page-header">
+            <h1>Orders</h1>
+            <p>Manage requests and active projects</p>
+        </section>
+
+        <div class="status-tabs">
+            <button class="tab-btn" [class.active]="activeTab() === 'requests'" (click)="setTab('requests')">
+                Requests ({{ requests().length }})
+            </button>
+            <button class="tab-btn" [class.active]="activeTab() === 'active'" (click)="setTab('active')">
+                Active ({{ getActiveProjectsCount() }})
+            </button>
+        </div>
+
+        @if (loading()) {
+            <div style="text-align: center; padding: 40px; color: #64748b;">
+                <p>Loading...</p>
+            </div>
+        }
+
+        @if (activeTab() === 'requests') {
+            <div class="orders-container">
+                @if (!loading() && requests().length === 0) {
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <p>No pending requests</p>
+                    </div>
+                }
+
+                @for (request of requests(); track request._id) {
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="client-info">
+                                <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100" alt="Freelancer">
+                                <div>
+                                    <h3>{{ request.gigId?.title }}</h3>
+                                    <span class="client-name">{{ request.freelancerId?.firstName }} {{ request.freelancerId?.lastName }}</span>
+                                </div>
+                            </div>
+                            <div class="order-status">
+                                <span>{{ request.status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="order-details">
+                            <p style="color: #94a3b8; margin-bottom: 1rem;">{{ request.requestMessage || 'No message provided' }}</p>
+
+                            @if (request.freelancerProfile) {
+                                <div class="freelancer-details">
+                                    <p><strong>Title:</strong> {{ request.freelancerProfile.title }}</p>
+                                    <p><strong>Experience:</strong> {{ request.freelancerProfile.experienceYears }} years</p>
+                                    @if (request.freelancerProfile.skills?.length > 0) {
+                                        <p><strong>Skills:</strong> {{ request.freelancerProfile.skills.join(', ') }}</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="order-actions">
+                            <button class="action-btn deliver-btn" (click)="acceptRequest(request._id)">
+                                Accept Request
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (activeTab() === 'active') {
+            <div class="orders-container">
+                @if (!loading() && getActiveProjectsCount() === 0) {
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <p>No active projects</p>
+                    </div>
+                }
+
+                @for (project of getActiveProjects(); track project._id) {
+                    <div class="order-card">
+                            <div class="order-header">
+                                <div class="client-info">
+                                    <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100" alt="Freelancer">
+                                    <div>
+                                        <h3>{{ project.gigId?.title }}</h3>
+                                        <span class="client-name">{{ project.freelancerId?.firstName }} {{ project.freelancerId?.lastName }}</span>
+                                    </div>
+                                </div>
+                                <div class="order-status">
+                                    <span>{{ project.status }}</span>
+                                </div>
+                            </div>
+
+                            <div class="order-details">
+                                <div class="progress-section">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="progress-percent">{{ project.progressPercentage }}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" [style.width.%]="project.progressPercentage"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                }
+            </div>
+        }
+    </main>
+
+    <nav class="bottom-nav">
+        <a routerLink="/client/home" class="nav-item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a routerLink="/client/orders" class="nav-item active">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="9"/>
+            </svg>
+            <span>Orders</span>
+        </a>
+        <a routerLink="/client/profile" class="nav-item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+</div>
